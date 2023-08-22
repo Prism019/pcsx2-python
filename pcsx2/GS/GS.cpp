@@ -30,6 +30,7 @@
 #include "Host.h"
 #include "Input/InputManager.h"
 #include "MTGS.h"
+#include "Python/submodules/GS.h"
 #include "pcsx2/GS.h"
 #include "GS/Renderers/Null/GSRendererNull.h"
 #include "GS/Renderers/HW/GSRendererHW.h"
@@ -416,6 +417,7 @@ void GSvsync(u32 field, bool registers_written)
 	// get cleared in HW VSync, and may be needed for a buffered draw (FFX FMVs).
 	g_gs_renderer->Flush(GSState::VSYNC);
 	g_gs_renderer->VSync(field, registers_written, g_gs_renderer->IsIdleFrame());
+	Python::PyGS::vsync_event.Invoke();
 }
 
 int GSfreeze(FreezeAction mode, freezeData* data)

@@ -98,6 +98,9 @@ endif(WIN32)
 # Require threads on all OSes.
 find_package(Threads REQUIRED)
 
+# Python scripting support
+find_package(Python3 REQUIRED COMPONENTS Development)
+
 set(ACTUALLY_ENABLE_TESTS ${ENABLE_TESTS})
 if(ENABLE_TESTS)
 	if(NOT EXISTS "${CMAKE_SOURCE_DIR}/3rdparty/gtest/CMakeLists.txt")

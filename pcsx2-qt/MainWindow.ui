@@ -145,6 +145,8 @@
     <addaction name="actionEnableEEConsoleLogging"/>
     <addaction name="actionEnableIOPConsoleLogging"/>
     <addaction name="actionEnableCDVDVerboseReads"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadPythonScript"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -1063,6 +1065,11 @@
    <property name="text">
     <string>Video Capture</string>
    </property>
+  </action>
+  <action name="actionLoadPythonScript">
+    <property name="text">
+      <string>Load Python Script...</string>
+    </property>
   </action>
  </widget>
  <resources>

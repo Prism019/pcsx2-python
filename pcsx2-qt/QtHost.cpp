@@ -41,6 +41,8 @@
 #include "pcsx2/LogSink.h"
 #include "pcsx2/MTGS.h"
 #include "pcsx2/PerformanceMetrics.h"
+#include "pcsx2/Python/PythonThread.h"
+#include "pcsx2/Python/submodules/VM.h"
 #include "pcsx2/SysForwardDefs.h"
 #include "pcsx2/VMManager.h"
 
@@ -1835,6 +1837,12 @@ int main(int argc, char* argv[])
 	QtHost::HookSignals();
 	EmuThread::start();
 
+	// Start the Python thread.
+	Python::PyVM::SetVMPaused = [](bool paused){g_emu_thread->setVMPaused(paused);};
+	Python::PyVM::GetVMPaused = [](){return QtHost::IsVMPaused();};
+	Python::PyVM::GetCurrentDiscSerial = [](){return VMManager::GetDiscSerial();};
+	Python::PythonThread::start();
+
 	// Optionally run setup wizard.
 	int result;
 	if (s_run_setup_wizard && !QtHost::RunSetupWizard())
@@ -1878,6 +1886,8 @@ int main(int argc, char* argv[])
 
 shutdown_and_exit:
 	// Shutting down.
+	Python::shutdown_event.Invoke();
+	Python::PythonThread::stop();
 	EmuThread::stop();
 	if (g_main_window)
 	{

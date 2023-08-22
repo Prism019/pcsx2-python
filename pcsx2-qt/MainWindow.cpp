@@ -22,6 +22,7 @@
 #include "GameList/GameListRefreshThread.h"
 #include "GameList/GameListWidget.h"
 #include "MainWindow.h"
+#include "Python/submodules/VM.h"
 #include "QtHost.h"
 #include "QtUtils.h"
 #include "SettingWidgetBinder.h"
@@ -34,6 +35,7 @@
 #include "svnrev.h"
 
 #include "pcsx2/Achievements.h"
+#include "common/Console.h"
 #include "pcsx2/CDVD/CDVDcommon.h"
 #include "pcsx2/CDVD/CDVDdiscReader.h"
 #include "pcsx2/GS.h"
@@ -395,6 +397,9 @@ void MainWindow::connectSignals()
 	SettingWidgetBinder::BindWidgetToBoolSetting(nullptr, m_ui.actionInputRecConsoleLogs, "Logging", "EnableInputRecordingLogs", false);
 	SettingWidgetBinder::BindWidgetToBoolSetting(nullptr, m_ui.actionInputRecControllerLogs, "Logging", "EnableControllerLogs", false);
 	connect(m_ui.actionInputRecOpenViewer, &QAction::triggered, this, &MainWindow::onInputRecOpenViewer);
+
+	// Python Script
+	connect(m_ui.actionLoadPythonScript, &QAction::triggered, this, &MainWindow::onLoadPythonScriptActionTriggered);
 
 	// These need to be queued connections to stop crashing due to menus opening/closing and switching focus.
 	connect(m_game_list_widget, &GameListWidget::refreshProgress, this, &MainWindow::onGameListRefreshProgress);
@@ -1600,6 +1605,19 @@ void MainWindow::onInputRecOpenViewer()
 }
 
 
+void MainWindow::onLoadPythonScriptActionTriggered()
+{
+	const QString path(
+		QDir::toNativeSeparators(QFileDialog::getOpenFileName(this, tr("Load Python Script"), QString(), tr("Python Scripts (*.py)"), nullptr)));
+	if (path.isEmpty())
+		return;
+
+	Python::shutdown_event.Invoke();
+
+	Python::PythonThread::OpenScript(path.toStdString());
+}
+
+
 void MainWindow::onVMStarting()
 {
 	s_vm_valid = true;
@@ -1618,6 +1636,7 @@ void MainWindow::onVMStarted()
 	updateWindowTitle();
 	updateStatusBarWidgetVisibility();
 	updateInputRecordingActions(true);
+	Python::PyVM::started_event.Invoke();
 }
 
 void MainWindow::onVMPaused()

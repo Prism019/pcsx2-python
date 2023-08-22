@@ -179,6 +179,9 @@ private Q_SLOTS:
 	void onInputRecOpenSettingsTriggered();
 	void onInputRecOpenViewer();
 
+	// Python Script
+	void onLoadPythonScriptActionTriggered();
+
 	void onVMStarting();
 	void onVMStarted();
 	void onVMPaused();

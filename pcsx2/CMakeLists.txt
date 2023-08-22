@@ -1001,6 +1001,29 @@ set(pcsx2RecordingHeaders
 	${rec_src}/Utilities/InputRecordingLogger.h
 )
 
+# Python sources
+set(pcsx2PythonSources
+	Python/PythonEvent.cpp
+	Python/PythonThread.cpp
+
+	Python/PythonModule.cpp
+	Python/submodules/Console.cpp
+	Python/submodules/GS.cpp
+	Python/submodules/VM.cpp
+)
+
+# Python headers
+set(pcsx2PythonHeaders
+	Python/PythonIncludeGuard.h
+	Python/PythonEvent.h
+	Python/PythonThread.h
+
+	Python/PythonModule.h
+	Python/submodules/Console.h
+	Python/submodules/GS.h
+	Python/submodules/VM.h
+)
+
 # Windows sources
 set(pcsx2WindowsSources
 	CDVD/Windows/DriveUtility.cpp
@@ -1128,6 +1151,8 @@ target_sources(PCSX2 PRIVATE
 	${pcsx2InputHeaders}
 	${pcsx2ps2Sources}
 	${pcsx2ps2Headers}
+	${pcsx2PythonSources}
+	${pcsx2PythonHeaders}
 )
 
 # platform sources
@@ -1181,6 +1206,7 @@ target_link_libraries(PCSX2_FLAGS INTERFACE
 	PNG::PNG
 	LibLZMA::LibLZMA
 	Zstd::Zstd
+	${Python3_LIBRARIES}
 	${LIBC_LIBRARIES}
 )
 
@@ -1230,6 +1256,7 @@ target_include_directories(PCSX2_FLAGS INTERFACE
 	"${CMAKE_BINARY_DIR}/common/include"
 	"${CMAKE_SOURCE_DIR}/3rdparty/xbyak"
 	"${FFMPEG_INCLUDE_DIRS}"
+	"${Python3_INCLUDE_DIRS}"
 )
 target_compile_definitions(PCSX2_FLAGS INTERFACE
 	XBYAK_NO_EXCEPTION
