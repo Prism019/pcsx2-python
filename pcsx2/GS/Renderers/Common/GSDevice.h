@@ -172,10 +172,12 @@ enum ChannelFetch
 
 enum class HWBlendType
 {
-	SRC_ONE_DST_FACTOR      = 1, // Use the dest color as blend factor, Cs is set to 1.
+	SRC_ONE_DST_FACTOR1     = 1, // Use the dest color as blend factor, Cs is set to 1.
 	SRC_ALPHA_DST_FACTOR    = 2, // Use the dest color as blend factor, Cs is set to (Alpha - 1).
 	SRC_DOUBLE              = 3, // Double source color.
 	SRC_HALF_ONE_DST_FACTOR = 4, // Use the dest color as blend factor, Cs is set to 0.5, additionally divide As or Af by 2.
+	SRC_FLOAT_PRECISION     = 5, // Adjust Cs by a small amount to compensate for float precision loss.
+	SRC_ONE_DST_FACTOR2     = 6, // Use the dest color as blend factor, Cs is set to 0.9921875 instead of 1 for float precision loss.
 
 	BMIX1_ALPHA_HIGH_ONE    = 1, // Blend formula is replaced when alpha is higher than 1.
 	BMIX1_SRC_HALF          = 2, // Impossible blend will always be wrong on hw, divide Cs by 2.

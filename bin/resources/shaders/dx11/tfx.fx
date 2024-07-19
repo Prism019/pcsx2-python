@@ -982,6 +982,16 @@ void ps_blend(inout float4 Color, inout float4 As_rgba, float2 pos_xy)
 			As_rgba.rgb = (float3)Alpha * (float3)(128.0f / 255.0f);
 			Color.rgb = (float3)127.5f;
 		}
+		else if (PS_BLEND_HW == 5)
+		{
+			// Needed for Cs*Ad, Cs*Ad + Cd, Cd - Cs*Ad.
+			Color.rgb = max(Color.rgb - (Color.rgb  / (float3)128.0f), (float3)0.0f);
+		}
+		else if (PS_BLEND_HW == 6)
+		{
+			// Needed for Cd*Ad - Cs*Ad, Cs*Ad - Cd*Ad.
+			Color.rgb = (float3)253.0f;
+		}
 	}
 }
 

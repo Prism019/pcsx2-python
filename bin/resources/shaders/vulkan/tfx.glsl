@@ -1205,6 +1205,12 @@ void ps_blend(inout vec4 Color, inout vec4 As_rgba)
 
 			As_rgba.rgb = vec3(Alpha) * vec3(128.0f / 255.0f);
 			Color.rgb = vec3(127.5f);
+		#elif PS_BLEND_HW == 5
+			// Needed for Cs*Ad, Cs*Ad + Cd, Cd - Cs*Ad.
+			Color.rgb = max(Color.rgb - (Color.rgb  / vec3(128.0f)), vec3(0.0f));
+		#elif PS_BLEND_HW == 6
+			// Needed for Cd*Ad - Cs*Ad, Cs*Ad - Cd*Ad.
+			Color.rgb = vec3(253.0f);
 		#endif
 	#endif
 }

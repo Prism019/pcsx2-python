@@ -4643,7 +4643,7 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 				blend.dst = (m_conf.ps.blend_c == 1) ? GSDevice::DST_ALPHA : GSDevice::SRC1_COLOR;
 				// Render pass 2: Take result (Cd) from render pass 1 and double it.
 				m_conf.blend_second_pass.enable = true;
-				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR);
+				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR1);
 				m_conf.blend_second_pass.blend = {true, blend_second_pass.src, GSDevice::CONST_ONE, blend_second_pass.op, GSDevice::CONST_ONE, GSDevice::CONST_ZERO, false, 0};
 			}
 			else if (alpha_c1_high_no_rta_correct && (blend_flag & BLEND_HW3))
@@ -4653,6 +4653,7 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 				// Render pass 1: Do Cs*Alpha, Cs*Alpha + Cd or Cd - Cs*Alpha on first pass.
 				// Render pass 2: Take result (Cd) from render pass 1 and either add or rev subtract Cs*Alpha based on the blend operation.
 				m_conf.blend_second_pass.enable = true;
+				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_FLOAT_PRECISION);
 				m_conf.blend_second_pass.blend = {true, blend_second_pass.src, GSDevice::CONST_ONE, blend_second_pass.op, GSDevice::CONST_ONE, GSDevice::CONST_ZERO, false, 0};
 			}
 			else if ((alpha_c0_high_max_one || alpha_c2_high_one) && (blend_flag & BLEND_HW4))
@@ -4679,7 +4680,7 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 				// Render pass 1: Do (Cd - Cs)*Alpha, (Cs - Cd)*Alpha or Cd*Alpha on first pass.
 				// Render pass 2: Take result (Cd) from render pass 1 and double it.
 				m_conf.blend_second_pass.enable = true;
-				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR);
+				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR2);
 				m_conf.blend_second_pass.blend = {true, GSDevice::DST_COLOR, GSDevice::CONST_ONE, GSDevice::OP_ADD, GSDevice::CONST_ONE, GSDevice::CONST_ZERO, false, 0};
 			}
 			else if (alpha_c1_high_no_rta_correct && (blend_flag & BLEND_HW6))
@@ -4692,7 +4693,7 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 				blend.src = GSDevice::CONST_COLOR;
 				// Render pass 2: Take result (Cd) from render pass 1 and double it.
 				m_conf.blend_second_pass.enable = true;
-				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR);
+				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR1);
 				m_conf.blend_second_pass.blend = {true, GSDevice::DST_COLOR, GSDevice::CONST_ONE, GSDevice::OP_ADD, GSDevice::CONST_ONE, GSDevice::CONST_ZERO, false, 0};
 			}
 			else if (alpha_c1_high_no_rta_correct && (blend_flag & BLEND_HW7))
@@ -4706,7 +4707,7 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 				blend.op = GSDevice::OP_SUBTRACT;
 				// Render pass 2: Take result (Cd) from render pass 1 and double it.
 				m_conf.blend_second_pass.enable = true;
-				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR);
+				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR1);
 				m_conf.blend_second_pass.blend = {true, GSDevice::DST_COLOR, GSDevice::CONST_ONE, GSDevice::OP_ADD, GSDevice::CONST_ONE, GSDevice::CONST_ZERO, false, 0};
 			}
 			else if (blend_flag & BLEND_HW8)
@@ -4726,13 +4727,14 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 				// Render pass 1: Do Cs*(1 - Alpha).
 				// Render pass 2: Take result (Cd) from render pass 1 and subtract Cs*Alpha from it.
 				m_conf.blend_second_pass.enable = true;
+				m_conf.blend_second_pass.blend_hw = static_cast<u8>(HWBlendType::SRC_FLOAT_PRECISION);
 				m_conf.blend_second_pass.blend = {true, GSDevice::DST_ALPHA, GSDevice::CONST_ONE, GSDevice::OP_REV_SUBTRACT, GSDevice::CONST_ONE, GSDevice::CONST_ZERO, false, 0};
 			}
 		}
 
 		if (!m_conf.blend_second_pass.enable && blend_flag & BLEND_HW1)
 		{
-			m_conf.ps.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR);
+			m_conf.ps.blend_hw = static_cast<u8>(HWBlendType::SRC_ONE_DST_FACTOR1);
 		}
 		else if (blend_flag & BLEND_HW2)
 		{
@@ -4743,7 +4745,9 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 			m_conf.ps.blend_hw = static_cast<u8>(HWBlendType::SRC_DOUBLE);
 		}
 
-		if (m_conf.ps.blend_c == 2 && (m_conf.ps.blend_hw == 2 || m_conf.ps.blend_hw == 4 || m_conf.blend_second_pass.blend_hw == 2))
+		if (m_conf.ps.blend_c == 2 && (m_conf.ps.blend_hw == static_cast<u8>(HWBlendType::SRC_ALPHA_DST_FACTOR) ||
+										  m_conf.ps.blend_hw == static_cast<u8>(HWBlendType::SRC_HALF_ONE_DST_FACTOR) ||
+										  m_conf.blend_second_pass.blend_hw == static_cast<u8>(HWBlendType::SRC_ALPHA_DST_FACTOR)))
 			m_conf.cb_ps.TA_MaxDepth_Af.a = static_cast<float>(AFIX) / 128.0f;
 
 		const GSDevice::BlendFactor src_factor_alpha = m_conf.blend_second_pass.enable ? GSDevice::CONST_ZERO : GSDevice::CONST_ONE;
