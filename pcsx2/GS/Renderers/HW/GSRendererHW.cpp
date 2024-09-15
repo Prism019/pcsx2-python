@@ -4098,6 +4098,18 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 	GL_INS("Draw AlphaMinMax: %d-%d, RT AlphaMinMax: %d-%d, AFIX: %u", GetAlphaMinMax().min, GetAlphaMinMax().max, rt_alpha_min, rt_alpha_max, AFIX);
 #endif
 
+	if (rt->m_dirty.empty() && rt->m_rt_rgb_zero)
+	{
+		if (m_conf.ps.blend_a == 1)
+			m_conf.ps.blend_a = 2;
+		if (m_conf.ps.blend_b == 1)
+			m_conf.ps.blend_b = 2;
+		if (m_conf.ps.blend_d == 1)
+			m_conf.ps.blend_d = 2;
+
+		rt->m_rt_rgb_zero = false;
+	}
+
 	// If the colour is modulated to zero or we're not using a texture and the color is zero, we can replace any Cs with 0
 	if ((!PRIM->TME || m_cached_ctx.TEX0.TFX != TFX_DECAL) && (!PRIM->FGE || m_draw_env->FOGCOL.U32[0] == 0) && 
 		((m_vt.m_max.c == GSVector4i::zero()).mask() & 0xfff) == 0xfff)
@@ -4199,6 +4211,11 @@ void GSRendererHW::EmulateBlending(int rt_alpha_min, int rt_alpha_max, const boo
 		m_conf.ps.blend_b = 0;
 		m_conf.ps.blend_c = 0;
 		m_conf.ps.blend_d = 2;
+	}
+
+	if (rt->m_dirty.empty() && (m_conf.ps.blend_a == m_conf.ps.blend_b) && m_conf.ps.blend_d == 2)
+	{
+		rt->m_rt_rgb_zero = true;
 	}
 
 	// Ad cases, alpha write is masked, one barrier is enough, for d3d11 read the fb

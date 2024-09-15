@@ -220,6 +220,7 @@ public:
 		bool m_valid_alpha_high = false;
 		bool m_valid_rgb = false;
 		bool m_rt_alpha_scale = false;
+		bool m_rt_rgb_zero = false;
 		bool m_downscaled = false;
 		int m_last_draw = 0;
 
